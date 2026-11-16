@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGENTSTRIKE — Tactical FPS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./js/vendor/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= MAIN MENU ================= -->
+  <section id="screen-menu" class="screen active">
+    <div class="menu-wrap">
+      <h1 class="logo">AGENT<span>STRIKE</span></h1>
+      <p class="tagline">Pick your agent. Win the round. Own the lobby.</p>
+      <div class="menu-topbar">
+        <div class="pill">💰 <span id="menu-credits">0</span> CR</div>
+        <div class="pill">🏆 <span id="menu-rank-name">Iron</span> · <span id="menu-rank-points">0 RP</span></div>
+      </div>
+      <div class="menu-buttons">
+        <button id="btn-play" class="btn primary big">▶ PLAY</button>
+        <button id="btn-shop" class="btn big">🛒 SHOP</button>
+        <button id="btn-gacha" class="btn big">🎲 GACHA</button>
+      </div>
+      <p id="menu-stats" class="muted center"></p>
+      <div class="controls-box">
+        <strong>Controls</strong>
+        <span><b>WASD</b> move</span><span><b>Mouse</b> aim</span><span><b>Click</b> shoot</span>
+        <span><b>R</b> reload</span><span><b>Q</b> agent skill</span><span><b>1 / 2</b> switch weapon</span>
+        <span><b>Space</b> jump</span><span><b>Right-click</b> scope (Operator)</span><span><b>Tab</b> scoreboard</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AGENT SELECT ================= -->
+  <section id="screen-agents" class="screen">
+    <div class="page-wrap">
+      <h2>Select Your Agent</h2>
+      <p class="muted">Every agent has a unique skill on <b>Q</b>, different HP and speed.</p>
+      <div id="agent-grid" class="agent-grid"></div>
+      <button id="btn-agents-back" class="btn">← Back</button>
+    </div>
+  </section>
+
+  <!-- ================= MODE SELECT ================= -->
+  <section id="screen-modes" class="screen">
+    <div class="page-wrap">
+      <h2>Select Mode</h2>
+      <p id="modes-agent-label" class="muted"></p>
+      <div id="mode-grid" class="mode-grid"></div>
+      <button id="btn-modes-back" class="btn">← Back</button>
+    </div>
+  </section>
+
+  <!-- ================= SHOP ================= -->
+  <section id="screen-shop" class="screen">
+    <div class="page-wrap">
+      <h2>Shop</h2>
+      <p class="muted">Credits: <strong id="shop-credits">0</strong> CR — earn more from kills, round wins and match wins.</p>
+      <h3>Weapons</h3>
+      <div id="shop-weapons" class="shop-grid"></div>
+      <h3>Gear</h3>
+      <div id="shop-items" class="shop-grid"></div>
+      <button id="btn-shop-back" class="btn">← Back</button>
+    </div>
+  </section>
+
+  <!-- ================= GACHA ================= -->
+  <section id="screen-gacha" class="screen">
+    <div class="page-wrap">
+      <h2>Skin Gacha</h2>
+      <p class="muted">Credits: <strong id="gacha-credits">0</strong> CR · Common 60% · Rare 25% · Epic 10% · Legendary 5%</p>
+      <div class="gacha-box">
+        <div id="gacha-stage" class="gacha-stage">???</div>
+        <button id="btn-roll" class="btn primary big">Roll — 200 CR</button>
+        <div id="gacha-result"></div>
+      </div>
+      <h3>Inventory</h3>
+      <div id="inventory-grid" class="inv-grid"></div>
+      <button id="btn-gacha-back" class="btn">← Back</button>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section id="screen-results" class="screen">
+    <div class="page-wrap center">
+      <h2 id="results-title" class="results-title">VICTORY</h2>
+      <p id="results-subtitle" class="muted"></p>
+      <div id="results-stats" class="results-stats"></div>
+      <p id="results-rewards" class="rewards"></p>
+      <div id="results-scoreboard" class="scoreboard-box"></div>
+      <div class="menu-buttons">
+        <button id="btn-again" class="btn primary">↻ Play Again</button>
+        <button id="btn-results-shop" class="btn">🛒 Shop</button>
+        <button id="btn-results-menu" class="btn">Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MATCH ================= -->
+  <section id="screen-match" class="screen">
+    <div id="game-container"></div>
+
+    <!-- HUD -->
+    <div id="hud-top">
+      <div id="hud-mode">AGENTSTRIKE</div>
+      <div id="hud-score">0 — 0</div>
+      <div id="hud-timer">0:00</div>
+      <div id="hud-alive"></div>
+    </div>
+    <div id="hud-credits">+0 CR</div>
+    <div id="killfeed"></div>
+    <div id="recon-markers"></div>
+    <div id="crosshair"><div class="ch-dot"></div><div class="ch-line ch-t"></div><div class="ch-line ch-b"></div><div class="ch-line ch-l"></div><div class="ch-line ch-r"></div></div>
+    <div id="hitmarker">✕</div>
+    <div id="damage-flash"></div>
+
+    <div id="hud-bottom">
+      <div id="hud-health">
+        <div class="hud-label">HP</div>
+        <div class="bar"><div id="hud-health-fill"></div></div>
+        <div id="hud-health-text">100 / 100</div>
+      </div>
+      <div id="hud-skill-box">
+        <div id="hud-skill-fill"></div>
+        <div class="hud-skill-inner">
+          <span class="key">Q</span>
+          <span id="hud-skill-name">Skill</span>
+          <span id="hud-skill-cool">READY</span>
+        </div>
+      </div>
+      <div id="hud-ammo-box">
+        <div id="hud-weapon">Classic</div>
+        <div id="hud-ammo">12 / 12</div>
+      </div>
+    </div>
+
+    <div id="countdown" class="hidden">3</div>
+    <div id="round-banner" class="banner hidden"><span id="round-banner-text"></span></div>
+
+    <div id="dead-overlay" class="overlay hidden">
+      <h2>You are down</h2>
+      <p>Wait for the round to end — your squad is still fighting.</p>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden">
+      <h2>Paused</h2>
+      <div class="menu-buttons">
+        <button id="btn-resume" class="btn primary">Resume</button>
+        <button id="btn-quit" class="btn">Abandon Match</button>
+      </div>
+    </div>
+
+    <div id="deploy-overlay" class="overlay">
+      <h2 id="deploy-title">Deploy</h2>
+      <p id="deploy-sub"></p>
+      <p class="deploy-cta">CLICK TO DEPLOY</p>
+    </div>
+
+    <div id="scoreboard" class="hidden">
+      <h3>Scoreboard</h3>
+      <div class="sb-head"><span>Player</span><span>K</span><span>D</span></div>
+      <div id="scoreboard-rows"></div>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="hidden"></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
