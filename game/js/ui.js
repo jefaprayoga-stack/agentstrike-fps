@@ -417,6 +417,20 @@ function drawMinimap(s) {
     ctx.fillRect(sx(w.x - w.w / 2), sz(w.z - w.d / 2),
       Math.max(1, (w.w / (bx * 2)) * W), Math.max(1, (w.d / (bz * 2)) * H));
   }
+  // callout labels (site labels sit below the big A/B letters; x clamped so
+  // edge labels like ATK SPAWN / DEF SPAWN are never cut off)
+  ctx.font = 'bold 8px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.fillStyle = 'rgba(220, 228, 240, 0.9)';
+  for (const c of MAP_DATA.callouts || []) {
+    const dy = c.name.endsWith('SITE') ? 13 : 0;
+    const tw = ctx.measureText(c.name).width;
+    const tx = Math.min(Math.max(sx(c.lx), tw / 2 + 2), W - tw / 2 - 2);
+    ctx.strokeText(c.name, tx, sz(c.lz) + dy);
+    ctx.fillText(c.name, tx, sz(c.lz) + dy);
+  }
   const dot = (x, z, color, r = 3) => {
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -479,6 +493,9 @@ function updateHud(s) {
   $('hud-weapon').textContent = s.weaponName + (s.scoped ? ' · ADS' : '');
   $('crosshair').classList.toggle('ads-hidden', !!s.adsScoped);
   $('hud-credits').textContent = '+' + fmt(s.credits) + ' CR';
+  // location callout (changes with player position)
+  const locEl = $('hud-location');
+  if (locEl && s.location && locEl.textContent !== s.location) locEl.textContent = s.location;
   // skill
   const skillBox = $('hud-skill-box');
   if (s.skillCooldown > 0) {

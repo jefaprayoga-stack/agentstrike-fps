@@ -56,31 +56,62 @@ export const SITES = [
 ];
 
 const WALL_DEFS = [
-  // perimeter
-  { x: 0, z: -21, w: 64, d: 2, h: 5 }, { x: 0, z: 21, w: 64, d: 2, h: 5 },
-  { x: -31, z: 0, w: 2, d: 44, h: 5 }, { x: 31, z: 0, w: 2, d: 44, h: 5 },
-  // mid divider: two segments, three gaps (center, north edge, south edge)
-  { x: 0, z: -9, w: 2, d: 10, h: 3.4 }, { x: 0, z: 9, w: 2, d: 10, h: 3.4 },
-  // attacker-side buildings (west half)
-  { x: -12, z: -12, w: 4, d: 3, h: 3 }, { x: -12, z: 12, w: 4, d: 3, h: 3 },
-  // A-link / B-link blocks on the east approaches
-  { x: 10, z: -12, w: 4, d: 2, h: 3 }, { x: 10, z: 12, w: 4, d: 2, h: 3 },
-  // mid crates
-  { x: -8, z: -6, w: 2, d: 2, h: 1.2 }, { x: -8, z: 6, w: 2, d: 2, h: 1.2 },
-  { x: 8, z: 0, w: 2, d: 2, h: 1.2 },
+  // perimeter — rebuilt as war-damaged town buildings (footprints unchanged)
+  { x: 0, z: -21, w: 64, d: 2, h: 5, kind: 'perimeter', face: 'north' },
+  { x: 0, z: 21, w: 64, d: 2, h: 5, kind: 'perimeter', face: 'south' },
+  { x: -31, z: 0, w: 2, d: 44, h: 5, kind: 'perimeter', face: 'west' },
+  { x: 31, z: 0, w: 2, d: 44, h: 5, kind: 'perimeter', face: 'east' },
+  // mid divider: two ruined wall segments, three gaps (center, north edge, south edge)
+  { x: 0, z: -9, w: 2, d: 10, h: 3.4, kind: 'divider' },
+  { x: 0, z: 9, w: 2, d: 10, h: 3.4, kind: 'divider' },
+  // attacker-side buildings (west half) — small damaged shops
+  { x: -12, z: -12, w: 4, d: 3, h: 3, kind: 'shop', sign: 'CAFE' },
+  { x: -12, z: 12, w: 4, d: 3, h: 3, kind: 'shop', sign: 'SHOP' },
+  // A-link / B-link blocks on the east approaches — ruined kiosks
+  { x: 10, z: -12, w: 4, d: 2, h: 3, kind: 'link' },
+  { x: 10, z: 12, w: 4, d: 2, h: 3, kind: 'link' },
+  // mid cover — sandbag positions
+  { x: -8, z: -6, w: 2, d: 2, h: 1.2, kind: 'sandbags' },
+  { x: -8, z: 6, w: 2, d: 2, h: 1.2, kind: 'sandbags' },
+  { x: 8, z: 0, w: 2, d: 2, h: 1.2, kind: 'crate' },
   // site A cover
-  { x: 17, z: -17, w: 2, d: 2, h: 1.2 }, { x: 23, z: -11, w: 2, d: 2, h: 1.2 },
-  { x: 22, z: -17, w: 3, d: 2, h: 2 },
+  { x: 17, z: -17, w: 2, d: 2, h: 1.2, kind: 'sandbags' },
+  { x: 23, z: -11, w: 2, d: 2, h: 1.2, kind: 'crate' },
+  { x: 22, z: -17, w: 3, d: 2, h: 2, kind: 'barrier' },
   // site B cover
-  { x: 17, z: 17, w: 2, d: 2, h: 1.2 }, { x: 23, z: 11, w: 2, d: 2, h: 1.2 },
-  { x: 22, z: 17, w: 3, d: 2, h: 2 },
+  { x: 17, z: 17, w: 2, d: 2, h: 1.2, kind: 'sandbags' },
+  { x: 23, z: 11, w: 2, d: 2, h: 1.2, kind: 'crate' },
+  { x: 22, z: 17, w: 3, d: 2, h: 2, kind: 'barrier' },
   // spawn cover
-  { x: -22, z: -6, w: 2, d: 2, h: 1.2 }, { x: -22, z: 6, w: 2, d: 2, h: 1.2 },
-  { x: 24, z: 0, w: 2, d: 2, h: 1.2 },
+  { x: -22, z: -6, w: 2, d: 2, h: 1.2, kind: 'crate' },
+  { x: -22, z: 6, w: 2, d: 2, h: 1.2, kind: 'crate' },
+  { x: 24, z: 0, w: 2, d: 2, h: 1.2, kind: 'sandbags' },
 ];
 
+// Map callouts, Valorant/CS style. Rects tile the whole arena (checked in
+// order: sites first, then spawns, then lanes, then Mid). lx/lz is the
+// minimap label anchor.
+export const CALLOUTS = [
+  { name: 'A SITE', x0: 14.5, x1: 25.5, z0: -18.5, z1: -9.5, lx: 20, lz: -11.2 },
+  { name: 'B SITE', x0: 14.5, x1: 25.5, z0: 9.5, z1: 18.5, lx: 20, lz: 11.2 },
+  { name: 'ATK SPAWN', x0: -30, x1: -23, z0: -20, z1: 20, lx: -26.5, lz: 0 },
+  { name: 'DEF SPAWN', x0: 23, x1: 30, z0: -20, z1: 20, lx: 26.5, lz: 0 },
+  { name: 'A LONG', x0: -23, x1: 0, z0: -20, z1: -11, lx: -13, lz: -16 },
+  { name: 'A SHORT', x0: 0, x1: 23, z0: -20, z1: -11, lx: 7, lz: -16.5 },
+  { name: 'B MAIN', x0: -23, x1: 0, z0: 11, z1: 20, lx: -13, lz: 16 },
+  { name: 'B SHORT', x0: 0, x1: 23, z0: 11, z1: 20, lx: 7, lz: 16.5 },
+  { name: 'MID', x0: -23, x1: 23, z0: -11, z1: 11, lx: 0, lz: 3 },
+];
+
+export function locationAt(x, z) {
+  for (const c of CALLOUTS) {
+    if (x >= c.x0 && x <= c.x1 && z >= c.z0 && z <= c.z1) return c.name;
+  }
+  return 'MID';
+}
+
 // Static map data for the minimap (imported by ui.js).
-export const MAP_DATA = { bounds: ARENA, walls: WALL_DEFS, sites: SITES };
+export const MAP_DATA = { bounds: ARENA, walls: WALL_DEFS, sites: SITES, callouts: CALLOUTS };
 
 const ATTACK_SPAWNS = [{ x: -27, z: -5 }, { x: -27, z: 0 }, { x: -27, z: 5 }];
 const DEFENSE_SPAWNS = [{ x: 27, z: -5 }, { x: 27, z: 0 }, { x: 27, z: 5 }];
@@ -134,6 +165,362 @@ function segmentHitsSphere(a, b, center, radius) {
   const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ac.dot(ab) / len2));
   const closest = new THREE.Vector3().copy(a).addScaledVector(ab, t);
   return closest.distanceTo(center) < radius;
+}
+
+// ---------------------------------------------------------------- procedural textures
+// The outdoor war-torn town is drawn, not modelled: canvas textures give the
+// buildings windows, signs, cracks and scorch marks for a handful of meshes.
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function canvasTex(w, h, draw, repeat) {
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  draw(cv.getContext('2d'), w, h);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  if (repeat) {
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(repeat[0], repeat[1]);
+  }
+  return tex;
+}
+
+// War-damaged building facade, ~12 m wide x ~9 m tall: window grid with
+// broken/lit/reflective panes, a storefront + sign band at street level,
+// cracks, scorch marks, bullet holes and grime.
+function facadeTexture({ base, trim = '#d8d2c4', sign = null, signBg = '#f5c518', signFg = '#1a1a1a', seed = 1 }) {
+  return canvasTex(512, 512, (ctx, W, H) => {
+    const rng = mulberry32(seed);
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, W, H);
+    // plaster variation: vertical streaks + patches
+    for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = rng() < 0.5 ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+      ctx.fillRect(rng() * W, 0, 4 + rng() * 22, H);
+    }
+    for (let i = 0; i < 12; i++) {
+      ctx.fillStyle = 'rgba(0,0,0,0.06)';
+      ctx.fillRect(rng() * W, rng() * H, 20 + rng() * 60, 10 + rng() * 30);
+    }
+    // floor separator lines + cornice
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    for (const y of [168, 336]) ctx.fillRect(0, y, W, 4);
+    ctx.fillStyle = trim;
+    ctx.fillRect(0, 0, W, 10);
+    ctx.fillRect(0, 332, W, 6);
+    // windows: 4 cols x 2 upper floors
+    const win = (x, y, w, h) => {
+      ctx.fillStyle = trim;
+      ctx.fillRect(x - 5, y - 5, w + 10, h + 10);
+      const r = rng();
+      if (r < 0.3) {
+        // broken / shot-out: near-black + crack lines
+        ctx.fillStyle = '#0c0e12';
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 1.5;
+        const cx = x + w / 2, cy = y + h / 2;
+        for (let k = 0; k < 5; k++) {
+          const a = rng() * Math.PI * 2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(a) * w * 0.55, cy + Math.sin(a) * h * 0.55);
+          ctx.stroke();
+        }
+      } else if (r < 0.5) {
+        // warm lit interior
+        const g = ctx.createLinearGradient(x, y, x, y + h);
+        g.addColorStop(0, '#ffd98a');
+        g.addColorStop(1, '#c98a3a');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, y, w, h);
+      } else {
+        // reflective glass
+        const g = ctx.createLinearGradient(x, y, x + w, y + h);
+        g.addColorStop(0, '#5a7a96');
+        g.addColorStop(0.5, '#2c4258');
+        g.addColorStop(1, '#16242f');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.beginPath();
+        ctx.moveTo(x + w * 0.1, y + h);
+        ctx.lineTo(x + w * 0.45, y);
+        ctx.lineTo(x + w * 0.65, y);
+        ctx.lineTo(x + w * 0.3, y + h);
+        ctx.closePath();
+        ctx.fill();
+      }
+      // cross mullions
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillRect(x + w / 2 - 2, y, 4, h);
+      ctx.fillRect(x, y + h / 2 - 2, w, 4);
+    };
+    for (let f = 0; f < 2; f++) {
+      for (let c = 0; c < 4; c++) {
+        win(28 + c * 122, 36 + f * 168, 72, 96);
+      }
+    }
+    // ground floor: storefront glass + door, sign band above
+    const gy = 352;
+    if (sign) {
+      ctx.fillStyle = signBg;
+      ctx.fillRect(16, gy, W - 32, 46);
+      ctx.fillStyle = signFg;
+      ctx.font = 'bold 30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(sign, W / 2, gy + 25);
+    }
+    // shopfront windows
+    for (const [sx, sw] of [[24, 200], [288, 200]]) {
+      ctx.fillStyle = trim;
+      ctx.fillRect(sx - 5, gy + 58, sw + 10, 96);
+      const g = ctx.createLinearGradient(sx, gy + 58, sx, gy + 154);
+      g.addColorStop(0, '#4a6a84');
+      g.addColorStop(1, '#1c2c3a');
+      ctx.fillStyle = g;
+      ctx.fillRect(sx, gy + 58, sw, 96);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.beginPath();
+      ctx.moveTo(sx + sw * 0.15, gy + 154);
+      ctx.lineTo(sx + sw * 0.4, gy + 58);
+      ctx.lineTo(sx + sw * 0.55, gy + 58);
+      ctx.lineTo(sx + sw * 0.3, gy + 154);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // door
+    ctx.fillStyle = '#2a2118';
+    ctx.fillRect(224, gy + 58, 64, 96);
+    ctx.fillStyle = '#c9a86a';
+    ctx.fillRect(278, gy + 105, 6, 6);
+    // war damage: cracks
+    ctx.strokeStyle = 'rgba(20,16,12,0.7)';
+    for (let i = 0; i < 4; i++) {
+      let x = rng() * W, y = rng() * H * 0.7;
+      ctx.lineWidth = 1 + rng() * 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      for (let s = 0; s < 6; s++) {
+        x += (rng() - 0.5) * 36;
+        y += 12 + rng() * 22;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    // scorch marks
+    for (let i = 0; i < 2; i++) {
+      const x = rng() * W, y = 200 + rng() * 280, r = 50 + rng() * 70;
+      const g = ctx.createRadialGradient(x, y, 4, x, y, r);
+      g.addColorStop(0, 'rgba(10,8,6,0.55)');
+      g.addColorStop(1, 'rgba(10,8,6,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    // bullet holes
+    for (let i = 0; i < 10; i++) {
+      const x = rng() * W, y = rng() * H;
+      ctx.fillStyle = 'rgba(12,10,8,0.85)';
+      ctx.beginPath();
+      ctx.arc(x, y, 2 + rng() * 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // grime at the base
+    const g = ctx.createLinearGradient(0, H - 60, 0, H);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, H - 60, W, 60);
+  });
+}
+
+// Ruined concrete: cracked, scorched, exposed rebar near the top.
+function ruinTexture(seed = 1) {
+  return canvasTex(256, 256, (ctx, W, H) => {
+    const rng = mulberry32(seed);
+    ctx.fillStyle = '#8d8a82';
+    ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 60; i++) {
+      ctx.fillStyle = rng() < 0.5 ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)';
+      ctx.fillRect(rng() * W, rng() * H, 6 + rng() * 30, 4 + rng() * 18);
+    }
+    // exposed rebar
+    ctx.strokeStyle = '#4a3a2c';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 5; i++) {
+      const x = 20 + rng() * (W - 40);
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + (rng() - 0.5) * 14, 30 + rng() * 30);
+      ctx.stroke();
+    }
+    // cracks
+    ctx.strokeStyle = 'rgba(25,20,16,0.8)';
+    for (let i = 0; i < 5; i++) {
+      let x = rng() * W, y = rng() * H * 0.5;
+      ctx.lineWidth = 1 + rng() * 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      for (let s = 0; s < 7; s++) {
+        x += (rng() - 0.5) * 30;
+        y += 10 + rng() * 20;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    // scorch + holes
+    for (let i = 0; i < 2; i++) {
+      const x = rng() * W, y = 100 + rng() * 140, r = 40 + rng() * 50;
+      const g = ctx.createRadialGradient(x, y, 4, x, y, r);
+      g.addColorStop(0, 'rgba(8,6,5,0.6)');
+      g.addColorStop(1, 'rgba(8,6,5,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    for (let i = 0; i < 8; i++) {
+      ctx.fillStyle = 'rgba(10,8,6,0.9)';
+      ctx.beginPath();
+      ctx.arc(rng() * W, rng() * H, 2 + rng() * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+}
+
+function asphaltTexture() {
+  return canvasTex(256, 256, (ctx, W, H) => {
+    const rng = mulberry32(7);
+    ctx.fillStyle = '#3b3d40';
+    ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 2200; i++) {
+      const v = rng();
+      ctx.fillStyle = v < 0.5 ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.08)';
+      ctx.fillRect(rng() * W, rng() * H, 1.5, 1.5);
+    }
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.fillRect(rng() * W, rng() * H, 20 + rng() * 50, 12 + rng() * 30);
+    }
+    ctx.strokeStyle = 'rgba(10,10,10,0.5)';
+    for (let i = 0; i < 3; i++) {
+      let x = rng() * W, y = rng() * H;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      for (let s = 0; s < 6; s++) {
+        x += (rng() - 0.5) * 40;
+        y += (rng() - 0.5) * 40;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }, [9, 6]);
+}
+
+function paverTexture() {
+  return canvasTex(256, 256, (ctx, W, H) => {
+    const rng = mulberry32(11);
+    ctx.fillStyle = '#9a917e';
+    ctx.fillRect(0, 0, W, H);
+    const t = 64;
+    for (let y = 0; y < H; y += t) {
+      for (let x = 0; x < W; x += t) {
+        const v = (rng() - 0.5) * 14;
+        ctx.fillStyle = `rgb(${154 + v | 0},${145 + v | 0},${126 + v | 0})`;
+        ctx.fillRect(x + 2, y + 2, t - 4, t - 4);
+      }
+    }
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 3;
+    for (let i = 0; i <= W; i += t) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
+    }
+  }, [10, 1]);
+}
+
+function dashTexture() {
+  return canvasTex(64, 16, (ctx) => {
+    ctx.clearRect(0, 0, 64, 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillRect(4, 5, 40, 6);
+  }, [16, 1]);
+}
+
+function scorchTexture() {
+  return canvasTex(128, 128, (ctx, W, H) => {
+    const g = ctx.createRadialGradient(64, 64, 4, 64, 64, 62);
+    g.addColorStop(0, 'rgba(8,6,5,0.75)');
+    g.addColorStop(0.6, 'rgba(8,6,5,0.4)');
+    g.addColorStop(1, 'rgba(8,6,5,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  });
+}
+
+function signTexture(text, { bg = '#1c2b39', fg = '#ffffff', border = '#f5c518' } = {}) {
+  return canvasTex(256, 64, (ctx, W, H) => {
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 5;
+    ctx.strokeRect(4, 4, W - 8, H - 8);
+    ctx.fillStyle = fg;
+    ctx.font = 'bold 34px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, W / 2, H / 2 + 2);
+  });
+}
+
+function skyTexture() {
+  return canvasTex(64, 256, (ctx, W, H) => {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#2f7fd0');
+    g.addColorStop(0.45, '#7db9e8');
+    g.addColorStop(0.75, '#cfe8f7');
+    g.addColorStop(1, '#e8f3fb');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  });
+}
+
+function cloudTexture() {
+  return canvasTex(128, 64, (ctx) => {
+    ctx.clearRect(0, 0, 128, 64);
+    const blob = (x, y, r) => {
+      const g = ctx.createRadialGradient(x, y, 2, x, y, r);
+      g.addColorStop(0, 'rgba(255,255,255,0.95)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    };
+    blob(34, 42, 26);
+    blob(62, 32, 30);
+    blob(92, 42, 24);
+    blob(62, 46, 28);
+  });
+}
+
+function sunTexture() {
+  return canvasTex(128, 128, (ctx) => {
+    const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 62);
+    g.addColorStop(0, 'rgba(255,255,240,1)');
+    g.addColorStop(0.25, 'rgba(255,244,200,0.9)');
+    g.addColorStop(1, 'rgba(255,244,200,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 128, 128);
+  });
 }
 
 // ---------------------------------------------------------------- bot
@@ -268,10 +655,12 @@ export class Game {
     this.cb = cb; // { hud, killfeed, roundEnd, matchEnd, playerDied, playerRespawned }
     this.audio = new AudioSys();
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0b0e14);
-    this.scene.fog = new THREE.Fog(0x0b0e14, 45, 110);
-    this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 200);
+    this.scene.background = new THREE.Color(0x9fcdf0);
+    this.scene.fog = new THREE.Fog(0xcfe0ee, 60, 150);
+    this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 300);
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(this.renderer.domElement);
     this.raycaster = new THREE.Raycaster();
@@ -286,38 +675,300 @@ export class Game {
 
   buildWorld() {
     const scene = this.scene;
-    scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x1a1410, 1.1));
-    const sun = new THREE.DirectionalLight(0xfff2d8, 1.6);
-    sun.position.set(20, 30, 10);
+    // ---- daylight: bright sun, blue sky, soft shadows ----
+    scene.add(new THREE.HemisphereLight(0xcfe5ff, 0x9a8a68, 1.15));
+    const sun = new THREE.DirectionalLight(0xfff2d0, 2.4);
+    sun.position.set(25, 38, 12);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    const sc = sun.shadow.camera;
+    sc.left = -42; sc.right = 42; sc.top = 32; sc.bottom = -32; sc.near = 5; sc.far = 110;
+    sun.shadow.bias = -0.0006;
     scene.add(sun);
-    // floor
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(ARENA.x * 2 + 4, ARENA.z * 2 + 4),
-      new THREE.MeshLambertMaterial({ color: 0x232833 })
+
+    // ---- shared geometry / materials (reused across meshes) ----
+    const unitBox = new THREE.BoxGeometry(1, 1, 1);
+    const unitCyl = new THREE.CylinderGeometry(1, 1, 1, 10);
+    const roofMat = new THREE.MeshLambertMaterial({ color: 0x3a3733 });
+    const darkMat = new THREE.MeshLambertMaterial({ color: 0x17181c });
+    const crateMat = new THREE.MeshLambertMaterial({ color: 0x8a6a3a });
+    const sandMat = new THREE.MeshLambertMaterial({ color: 0xb09a6a });
+    const sandMat2 = new THREE.MeshLambertMaterial({ color: 0x9a8460 });
+    const concreteMat = new THREE.MeshLambertMaterial({ color: 0x8d8a82 });
+    const rubbleMat = new THREE.MeshLambertMaterial({ color: 0x5a564e });
+    const rubbleMat2 = new THREE.MeshLambertMaterial({ color: 0x6e675c });
+    const metalMat = new THREE.MeshLambertMaterial({ color: 0x3a4048 });
+    const leafMat = new THREE.MeshLambertMaterial({ color: 0x4a7a3a });
+    const box = (w, h, d, mat, x, y, z, o = {}) => {
+      const m = new THREE.Mesh(unitBox, mat);
+      m.scale.set(w, h, d);
+      m.position.set(x, y, z);
+      if (o.rx) m.rotation.x = o.rx;
+      if (o.ry) m.rotation.y = o.ry;
+      if (o.rz) m.rotation.z = o.rz;
+      if (o.shadow) { m.castShadow = true; m.receiveShadow = true; }
+      scene.add(m);
+      return m;
+    };
+    const cyl = (r, h, mat, x, y, z, o = {}) => {
+      const m = new THREE.Mesh(unitCyl, mat);
+      m.scale.set(r, h, r);
+      m.position.set(x, y, z);
+      if (o.shadow) { m.castShadow = true; m.receiveShadow = true; }
+      scene.add(m);
+      return m;
+    };
+
+    // ---- sky dome, sun disc, clouds ----
+    const sky = new THREE.Mesh(
+      new THREE.SphereGeometry(160, 24, 12),
+      new THREE.MeshBasicMaterial({ map: skyTexture(), side: THREE.BackSide, fog: false })
     );
-    floor.rotation.x = -Math.PI / 2;
-    scene.add(floor);
-    // grid lines for orientation
-    const grid = new THREE.GridHelper(64, 32, 0x3a4252, 0x2a3040);
-    grid.position.y = 0.01;
-    scene.add(grid);
-    // walls / crates
+    scene.add(sky);
+    const sunSpr = new THREE.Sprite(new THREE.SpriteMaterial({ map: sunTexture(), transparent: true, fog: false, depthWrite: false }));
+    sunSpr.position.set(70, 85, 35);
+    sunSpr.scale.set(26, 26, 1);
+    scene.add(sunSpr);
+    const cloudTex = cloudTexture();
+    const cloudRng = mulberry32(99);
+    for (let i = 0; i < 8; i++) {
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTex, transparent: true, opacity: 0.92, fog: false, depthWrite: false }));
+      const a = cloudRng() * Math.PI * 2;
+      const r = 55 + cloudRng() * 60;
+      s.position.set(Math.cos(a) * r, 38 + cloudRng() * 18, Math.sin(a) * r);
+      s.scale.set(22 + cloudRng() * 16, 9 + cloudRng() * 5, 1);
+      scene.add(s);
+    }
+
+    // ---- ground: asphalt streets, pavements, lane markings, scorch ----
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(76, 52),
+      new THREE.MeshLambertMaterial({ map: asphaltTexture() })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+    const paverH = paverTexture();
+    const paverV = paverTexture();
+    paverV.repeat.set(1, 10);
+    const walk = (w, d, x, z, tex) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshLambertMaterial({ map: tex }));
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(x, 0.02, z);
+      m.receiveShadow = true;
+      scene.add(m);
+    };
+    walk(64, 2.4, 0, -19.6, paverH);
+    walk(64, 2.4, 0, 19.6, paverH);
+    walk(2.4, 40, -29.6, 0, paverV);
+    walk(2.4, 40, 29.6, 0, paverV);
+    const dashTex = dashTexture();
+    for (const z of [-15.5, 0, 15.5]) {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(56, 0.35),
+        new THREE.MeshBasicMaterial({ map: dashTex, transparent: true, depthWrite: false })
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(0, 0.025, z);
+      scene.add(m);
+    }
+    for (const s of SITES) {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(s.w + 2, s.d + 2),
+        new THREE.MeshLambertMaterial({ map: paverTexture() })
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(s.x, 0.015, s.z);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    const scorchTex = scorchTexture();
+    for (const [x, z, s] of [[-20, -18, 4.5], [14, -18, 3.5], [-6, 17, 4], [24, 8, 3], [-24, 10, 3.5]]) {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(s, s),
+        new THREE.MeshBasicMaterial({ map: scorchTex, transparent: true, opacity: 0.6, depthWrite: false })
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.rotation.z = Math.random() * Math.PI;
+      m.position.set(x, 0.03, z);
+      scene.add(m);
+    }
+
+    // ---- buildings / walls / cover ----
     this.colliders = [];
     this.wallMeshes = [];
-    const wallMat = new THREE.MeshLambertMaterial({ color: 0x4a5160 });
-    const crateMat = new THREE.MeshLambertMaterial({ color: 0x8a6a3a });
-    const blockMat = new THREE.MeshLambertMaterial({ color: 0x5a4a52 });
+    const ruinMat = new THREE.MeshLambertMaterial({ map: ruinTexture(5) });
+    const ruinMat2 = new THREE.MeshLambertMaterial({ map: ruinTexture(9) });
+
+    // One town building: facade texture on the arena-facing side(s), plain
+    // sides, roof slab + rooftop props. The mesh blocks bullets and sight.
+    const addBuilding = (cx, cz, w, d, h, faceIdxs, opts) => {
+      const frontMat = new THREE.MeshLambertMaterial({ map: facadeTexture(opts) });
+      const sideMat = new THREE.MeshLambertMaterial({ color: new THREE.Color(opts.base) });
+      const mats = [sideMat, sideMat, roofMat, darkMat, sideMat, sideMat];
+      for (const i of faceIdxs) mats[i] = frontMat;
+      const m = new THREE.Mesh(unitBox, mats);
+      m.scale.set(w, h, d);
+      m.position.set(cx, h / 2, cz);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      scene.add(m);
+      this.wallMeshes.push(m);
+      box(w + 0.4, 0.3, d + 0.4, roofMat, cx, h + 0.15, cz, { shadow: true });
+      const rng = mulberry32(opts.seed + 100);
+      if (rng() < 0.7) box(1.2, 0.7, 0.9, metalMat, cx + (rng() - 0.5) * Math.max(0, w - 2.5), h + 0.65, cz, { shadow: true });
+      if (rng() < 0.5) cyl(0.22, 0.9, metalMat, cx + (rng() - 0.5) * Math.max(0, w - 2), h + 0.75, cz);
+      return m;
+    };
+
+    // Perimeter: each wall becomes a row of adjacent war-damaged buildings
+    // with varied heights and storefronts. Footprints match WALL_DEFS, so
+    // colliders and the minimap stay exactly aligned.
+    const PERIMETER = {
+      north: { faceIdx: [4], segs: [
+        { c: -25.6, w: 12.8, h: 9, base: '#a8573c', sign: 'PAWN SHOP', signBg: '#f5c518', signFg: '#1a1a1a', seed: 21 },
+        { c: -12.8, w: 12.8, h: 7.5, base: '#c9b896', sign: 'CAFE', signBg: '#2e5d3a', signFg: '#ffffff', seed: 22 },
+        { c: 0, w: 12.8, h: 10, base: '#7a8a96', sign: 'HOTEL', signBg: '#1c2b39', signFg: '#ffd76a', seed: 23 },
+        { c: 12.8, w: 12.8, h: 8, base: '#5d7a6a', sign: 'MARKET', signBg: '#8a2a2a', signFg: '#ffffff', seed: 24 },
+        { c: 25.6, w: 12.8, h: 9, base: '#b08a5a', sign: null, seed: 25 },
+      ] },
+      south: { faceIdx: [5], segs: [
+        { c: -25.6, w: 12.8, h: 8, base: '#c9b896', sign: 'BAKERY', signBg: '#7a4a26', signFg: '#ffffff', seed: 31 },
+        { c: -12.8, w: 12.8, h: 9.5, base: '#a8573c', sign: 'GARAGE', signBg: '#333a42', signFg: '#ffd76a', seed: 32 },
+        { c: 0, w: 12.8, h: 7, base: '#8d8a82', sign: 'PHARMACY', signBg: '#2e5d3a', signFg: '#ffffff', seed: 33 },
+        { c: 12.8, w: 12.8, h: 9, base: '#5d7a8a', sign: 'BAR', signBg: '#1c2b39', signFg: '#ff8a94', seed: 34 },
+        { c: 25.6, w: 12.8, h: 8, base: '#b0a58a', sign: null, seed: 35 },
+      ] },
+      west: { faceIdx: [0], segs: [
+        { c: -16.5, w: 11, h: 10, base: '#8d8a82', sign: 'APARTMENTS', signBg: '#1c2b39', signFg: '#ffffff', seed: 41 },
+        { c: -5.5, w: 11, h: 8, base: '#a8573c', sign: null, seed: 42 },
+        { c: 5.5, w: 11, h: 11, base: '#c9b896', sign: null, seed: 43 },
+        { c: 16.5, w: 11, h: 9, base: '#7a8a96', sign: null, seed: 44 },
+      ] },
+      east: { faceIdx: [1], segs: [
+        { c: -16.5, w: 11, h: 7, base: '#a8573c', sign: 'WAREHOUSE', signBg: '#333a42', signFg: '#ffd76a', seed: 51 },
+        { c: -5.5, w: 11, h: 9, base: '#8d8a82', sign: null, seed: 52 },
+        { c: 5.5, w: 11, h: 8, base: '#5d7a6a', sign: null, seed: 53 },
+        { c: 16.5, w: 11, h: 10, base: '#b08a5a', sign: null, seed: 54 },
+      ] },
+    };
+
     WALL_DEFS.forEach((w) => {
-      const mat = w.h > 3 ? wallMat : w.h > 1.5 ? blockMat : crateMat;
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w.w, w.h, w.d), mat);
-      mesh.position.set(w.x, w.h / 2, w.z);
-      scene.add(mesh);
-      this.wallMeshes.push(mesh);
+      if (w.kind === 'perimeter') {
+        const spec = PERIMETER[w.face];
+        const horizontal = w.face === 'north' || w.face === 'south';
+        for (const s of spec.segs) {
+          if (horizontal) addBuilding(s.c, w.z, s.w, w.d, s.h, spec.faceIdx, s);
+          else addBuilding(w.x, s.c, w.w, s.w, s.h, spec.faceIdx, s);
+        }
+      } else if (w.kind === 'divider') {
+        const mat = w.z < 0 ? ruinMat : ruinMat2;
+        const m = box(w.w, w.h, w.d, mat, w.x, w.h / 2, w.z, { shadow: true });
+        this.wallMeshes.push(m);
+        // jagged broken top edge
+        const rng = mulberry32((w.z * 10) | 0);
+        for (let i = 0; i < 3; i++) {
+          const jh = 0.3 + rng() * 0.6;
+          const jz = w.z - w.d / 2 + 1.5 + i * (w.d - 3) / 2 + (rng() - 0.5);
+          const jm = box(1.7, jh, 1.4 + rng() * 0.8, mat, w.x, w.h + jh / 2 - 0.05, jz, { shadow: true });
+          this.wallMeshes.push(jm);
+        }
+      } else if (w.kind === 'shop') {
+        // small damaged shop: sign texture on both street faces + awning
+        addBuilding(w.x, w.z, w.w, w.d, 4.5, [4, 5], {
+          base: w.z < 0 ? '#b08a5a' : '#7a8a96',
+          sign: w.sign, signBg: '#2e5d3a', signFg: '#ffffff', seed: w.z < 0 ? 61 : 62,
+        });
+        const awnMat = new THREE.MeshLambertMaterial({ color: w.z < 0 ? 0x8a2a2a : 0x2e5d3a });
+        box(3.6, 0.08, 1.3, awnMat, w.x, 2.7, w.z + (w.z < 0 ? 1.9 : -1.9), { rx: w.z < 0 ? 0.35 : -0.35, shadow: true });
+      } else if (w.kind === 'link') {
+        const mat = w.z < 0 ? ruinMat : ruinMat2;
+        const m = box(w.w, w.h, w.d, mat, w.x, w.h / 2, w.z, { shadow: true });
+        this.wallMeshes.push(m);
+        const rng = mulberry32((w.z * 7) | 0);
+        const jh = 0.4 + rng() * 0.4;
+        const jm = box(1.6, jh, 1.4, mat, w.x + (rng() - 0.5) * 1.5, w.h + jh / 2 - 0.05, w.z, { shadow: true });
+        this.wallMeshes.push(jm);
+      } else if (w.kind === 'sandbags') {
+        // hand-stacked sandbag rows, same 1.2 m height as the old crates
+        for (let i = 0; i < 3; i++) {
+          const sm = box(w.w - 0.1, 0.42, w.d - 0.1, i % 2 ? sandMat2 : sandMat,
+            w.x + (i % 2 ? 0.06 : -0.05), 0.21 + i * 0.4, w.z + (i === 1 ? -0.06 : 0.04),
+            { ry: (i - 1) * 0.05, shadow: true });
+          this.wallMeshes.push(sm);
+        }
+      } else if (w.kind === 'barrier') {
+        const m = box(w.w, w.h, w.d, w.z < 0 ? ruinMat : ruinMat2, w.x, w.h / 2, w.z, { shadow: true });
+        this.wallMeshes.push(m);
+      } else {
+        // crate
+        const m = box(w.w, w.h, w.d, crateMat, w.x, w.h / 2, w.z, { shadow: true });
+        this.wallMeshes.push(m);
+      }
       this.colliders.push({
         minX: w.x - w.w / 2, maxX: w.x + w.w / 2,
         minZ: w.z - w.d / 2, maxZ: w.z + w.d / 2,
       });
     });
+
+    // ---- war debris: rubble piles, lamps, planters, barrels ----
+    const rubbleGeoT = new THREE.TetrahedronGeometry(0.35);
+    const rubbleGeoB = new THREE.BoxGeometry(0.5, 0.3, 0.4);
+    const addRubble = (x, z, n) => {
+      const rng = mulberry32(((x * 31 + z * 17) | 0) + 500);
+      for (let i = 0; i < n; i++) {
+        const m = new THREE.Mesh(rng() < 0.5 ? rubbleGeoT : rubbleGeoB, rng() < 0.5 ? rubbleMat : rubbleMat2);
+        m.position.set(x + (rng() - 0.5) * 1.8, 0.08 + rng() * 0.12, z + (rng() - 0.5) * 1.8);
+        m.rotation.set(rng() * 3, rng() * 3, rng() * 3);
+        const s = 0.6 + rng() * 1.1;
+        m.scale.set(s, s * (0.5 + rng() * 0.5), s);
+        scene.add(m);
+      }
+    };
+    for (const [x, z] of [[1.4, -14.2], [-1.4, 14.2], [15, -18], [25, -10], [15, 18], [25, 10], [-14, -10], [-14, 10]]) {
+      addRubble(x, z, 5);
+    }
+    for (const [x, z] of [[-20, -18.6], [2, -18.6], [20, -18.6], [-20, 18.6], [2, 18.6], [20, 18.6]]) {
+      cyl(0.07, 4.5, metalMat, x, 2.25, z);
+      box(0.08, 0.08, 1.1, metalMat, x, 4.45, z + (z < 0 ? 0.5 : -0.5));
+      box(0.32, 0.12, 0.55, darkMat, x, 4.38, z + (z < 0 ? 0.95 : -0.95));
+    }
+    const planterGeo = new THREE.IcosahedronGeometry(0.55, 0);
+    for (const [x, z] of [[-25, -19.3], [25, -19.3], [-25, 19.3], [25, 19.3]]) {
+      box(1.4, 0.5, 0.6, concreteMat, x, 0.25, z, { shadow: true });
+      const bush = new THREE.Mesh(planterGeo, leafMat);
+      bush.position.set(x, 0.75, z);
+      bush.scale.set(1.2, 0.8, 0.9);
+      scene.add(bush);
+    }
+    const barrelMat = new THREE.MeshLambertMaterial({ color: 0x6a4a2a });
+    const barrelMat2 = new THREE.MeshLambertMaterial({ color: 0x4a5a3a });
+    for (const [x, z] of [[-28.5, -19.2], [28.5, 19.2]]) {
+      cyl(0.35, 0.9, barrelMat, x, 0.45, z, { shadow: true });
+      cyl(0.35, 0.9, barrelMat2, x + 0.8, 0.45, z + 0.3, { shadow: true });
+      cyl(0.35, 0.9, barrelMat, x + 0.3, 0.45, z + 0.85, { shadow: true });
+    }
+
+    // ---- callout signs in the world ----
+    const addSign = (text, x, y, z, ry, w = 3.2, opts = {}) => {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, w / 4),
+        new THREE.MeshBasicMaterial({ map: signTexture(text, opts) })
+      );
+      m.position.set(x, y, z);
+      m.rotation.y = ry;
+      scene.add(m);
+      return m;
+    };
+    addSign('A LONG', -14, 2.4, -19.85, 0);
+    addSign('B MAIN', -14, 2.4, 19.85, Math.PI);
+    addSign('MID', 0, 2.4, -3.9, 0);
+    addSign('A SHORT', 10, 2.0, -13.05, Math.PI);
+    addSign('B SHORT', 10, 2.0, 13.05, 0);
+    addSign('A SITE', 29.9, 2.6, -14, -Math.PI / 2);
+    addSign('B SITE', 29.9, 2.6, 14, -Math.PI / 2);
+    addSign('ATK SPAWN', -29.9, 2.6, 0, Math.PI / 2, 4);
+    addSign('DEF SPAWN', 29.9, 2.6, 0, -Math.PI / 2, 4);
     // site floor decals + floating letters
     const mkLabel = (text, x, z, color) => {
       const canvas = document.createElement('canvas');
@@ -658,6 +1309,7 @@ export class Game {
     const accentMat = new THREE.MeshLambertMaterial({ color: skin.accent, emissive: skin.glow });
     const darkMat = new THREE.MeshLambertMaterial({ color: 0x14161c });
     const metalMat = new THREE.MeshLambertMaterial({ color: 0x2a2f3a });
+    const woodMat = new THREE.MeshLambertMaterial({ color: 0x6b4a2a });
     const box = (w, h, d, mat, x, y, z, rx = 0) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
       m.position.set(x, y, z);
@@ -693,16 +1345,36 @@ export class Game {
       box(0.05, 0.03, 0.2, metalMat, 0, 0.05, -0.2);
       muzzleZ = 0.52;
     } else if (weapon.id === 'phantom') {
-      // rifle: long receiver, barrel, curved mag, stock, scope, handguard
-      box(0.08, 0.11, 0.55, bodyMat, 0, 0, -0.1);
-      cyl(0.02, 0.25, darkMat, 0, 0.02, -0.5);
-      box(0.06, 0.17, 0.1, darkMat, 0, -0.13, -0.08, 0.15);
-      box(0.07, 0.1, 0.2, darkMat, 0, -0.01, 0.26);
-      box(0.07, 0.07, 0.25, accentMat, 0, -0.01, -0.35);
-      cyl(0.032, 0.16, darkMat, 0, 0.1, -0.12);
-      cyl(0.028, 0.02, accentMat, 0, 0.1, -0.2);
-      box(0.05, 0.1, 0.07, darkMat, 0, -0.1, 0.1, 0.3);
-      muzzleZ = 0.64;
+      // M4 carbine: flat-top receiver with picatinny rail, front sight post,
+      // handguard, straight STANAG magazine, telescopic stock
+      box(0.08, 0.1, 0.5, bodyMat, 0, 0, -0.12);
+      box(0.05, 0.025, 0.46, darkMat, 0, 0.06, -0.12);
+      box(0.07, 0.08, 0.3, accentMat, 0, -0.005, -0.5);
+      box(0.03, 0.09, 0.04, darkMat, 0, 0.09, -0.6);
+      box(0.015, 0.05, 0.015, metalMat, 0, 0.14, -0.6);
+      cyl(0.018, 0.18, darkMat, 0, 0.02, -0.72);
+      box(0.055, 0.17, 0.09, metalMat, 0, -0.12, -0.08, 0.08);
+      box(0.06, 0.09, 0.24, darkMat, 0, -0.005, 0.24);
+      box(0.065, 0.11, 0.04, darkMat, 0, -0.005, 0.37);
+      box(0.05, 0.1, 0.07, darkMat, 0, -0.1, 0.08, 0.3);
+      box(0.04, 0.04, 0.03, darkMat, 0, 0.09, 0.02);
+      muzzleZ = 0.82;
+    } else if (weapon.id === 'ak47') {
+      // AK-47: curved 30-round magazine, wooden stock + handguard + grip,
+      // gas tube, distinctive AK front sight
+      box(0.08, 0.09, 0.45, bodyMat, 0, 0, -0.1);
+      box(0.05, 0.05, 0.28, metalMat, 0, 0.07, -0.42);
+      box(0.07, 0.07, 0.3, woodMat, 0, 0.01, -0.45);
+      box(0.04, 0.06, 0.05, darkMat, 0, 0.08, -0.62);
+      box(0.012, 0.07, 0.012, metalMat, 0, 0.13, -0.62);
+      cyl(0.016, 0.2, darkMat, 0, 0.02, -0.7);
+      box(0.055, 0.12, 0.1, accentMat, 0, -0.08, -0.06, 0.1);
+      box(0.055, 0.16, 0.1, accentMat, 0, -0.19, -0.13, 0.55);
+      box(0.07, 0.09, 0.26, woodMat, 0, -0.01, 0.24);
+      box(0.07, 0.1, 0.03, darkMat, 0, -0.01, 0.38);
+      box(0.05, 0.1, 0.07, woodMat, 0, -0.1, 0.06, 0.3);
+      box(0.04, 0.03, 0.08, darkMat, 0, 0.06, -0.02);
+      muzzleZ = 0.82;
     } else if (weapon.id === 'judge') {
       // shotgun: wide receiver, twin barrels, pump, stock, shell holder
       box(0.1, 0.12, 0.5, bodyMat, 0, 0, -0.08);
@@ -1479,6 +2151,7 @@ export class Game {
         inSite: inSite ? inSite.id : null,
       },
       minimapPlayer: this.player ? { x: this.player.pos.x, z: this.player.pos.z, yaw: this.yaw } : null,
+      location: this.player ? locationAt(this.player.pos.x, this.player.pos.z) : null,
       allies,
       enemies,
       ...extra,
