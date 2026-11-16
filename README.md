@@ -6,11 +6,11 @@ single-player against AI bots. No build step, no server, no multiplayer.
 
 ## Play
 
-Open `index.html` via any static server (ES modules + importmap need HTTP):
+Serve `game/` with any static server (ES modules + importmap need HTTP):
 
 ```bash
-python3 -m http.server 8000
-# then open http://localhost:8000
+node serve.ts
+# then open http://localhost:8080
 ```
 
 ## What's in the game
@@ -43,15 +43,19 @@ synthesized WebAudio sound set (no audio files).
 
 ## Files
 
-- `index.html` — entry point, all screens + HUD
-- `style.css` — UI styling
-- `js/data.js` — agents, weapons, shop, gacha pool, ranks
-- `js/state.js` — localStorage save (credits, inventory, rank)
-- `js/game.js` — three.js engine: map, player, bot AI, weapons, skills
-- `js/ui.js` — screens, shop, gacha, HUD wiring, results
-- `js/main.js` — bootstrap
-- `js/vendor/three.module.js` — three.js r160, vendored (MIT) so the game
-  runs fully offline with zero CDN dependency
+- `main.ts` — entry program: copies `game/` and `screenshots/` to `/output`
+  and writes `/output/dossier.json` (see `vendor/makefun-threejs.ts`)
+- `serve.ts` — tiny static server for `game/` on http://localhost:8080
+- `shots.json` — the 4 screenshots and the URLs they were captured from
+- `game/index.html` — entry point, all screens + HUD
+- `game/style.css` — UI styling
+- `game/js/data.js` — agents, weapons, shop, gacha pool, ranks
+- `game/js/state.js` — localStorage save (credits, inventory, rank)
+- `game/js/game.js` — three.js engine: map, player, bot AI, weapons, skills
+- `game/js/ui.js` — screens, shop, gacha, HUD wiring, results
+- `game/js/main.js` — bootstrap
+- `game/vendor/three/` — three.js 0.187.0, minified, vendored from the
+  competition kit (MIT) so the game runs fully offline with zero CDN dependency
 
 ## License
 
