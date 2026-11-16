@@ -87,6 +87,7 @@ export const WEAPONS = [
     range: 60,
     price: 0,
     pellets: 1,
+    adsFov: 55,
     desc: 'Reliable starter pistol. Free, always in your loadout.',
   },
   {
@@ -103,6 +104,7 @@ export const WEAPONS = [
     range: 45,
     price: 400,
     pellets: 1,
+    adsFov: 55,
     desc: 'Bullet hose. Shreds up close, sprays at range.',
   },
   {
@@ -119,6 +121,7 @@ export const WEAPONS = [
     range: 70,
     price: 800,
     pellets: 1,
+    adsFov: 42,
     desc: 'The workhorse rifle. Precise, punchy, quiet.',
   },
   {
@@ -135,6 +138,7 @@ export const WEAPONS = [
     range: 22,
     price: 700,
     pellets: 6,
+    adsFov: 55,
     desc: 'Six pellets of bad news. Devastating in tight corners.',
   },
   {
@@ -152,6 +156,7 @@ export const WEAPONS = [
     price: 1200,
     pellets: 1,
     scope: true,
+    adsFov: 28,
     desc: 'One shot, one kill. Right-click to scope.',
   },
 ];
@@ -176,8 +181,8 @@ export const SHOP_ITEMS = [
     id: 'vest',
     name: 'Reinforced Vest',
     price: 350,
-    desc: '+25 max HP for the whole match.',
-    apply: { hpBonus: 25 },
+    desc: '+25 armor: absorbs half the damage you take until it breaks.',
+    apply: { armor: 25 },
   },
 ];
 
@@ -220,16 +225,16 @@ export const MODES = [
   {
     id: 'ranked',
     name: 'Ranked',
-    tagline: 'First to 5 rounds · 3v3 team elimination',
-    desc: 'Win rounds as a team to take the match. Wins earn +100 Rank Points, losses +20. Climb from Iron to Immortal.',
+    tagline: 'First to 5 rounds · plant or defuse the spike · 3v3',
+    desc: 'Attackers plant the spike on site A or B, defenders stop them. Sides swap at halftime. Wins earn +100 Rank Points, losses +20. Climb from Iron to Immortal.',
     roundsToWin: 5,
     teamSize: 3,
   },
   {
     id: 'unranked',
     name: 'Unranked',
-    tagline: 'First to 3 rounds · 3v3 team elimination',
-    desc: 'Same tactical rounds, no rank on the line. Warm up, try agents, have fun.',
+    tagline: 'First to 3 rounds · plant or defuse the spike · 3v3',
+    desc: 'Same tactical spike rounds, no rank on the line. Warm up, try agents, have fun.',
     roundsToWin: 3,
     teamSize: 3,
   },
@@ -243,6 +248,16 @@ export const MODES = [
     teamSize: 1,
   },
 ];
+
+// Ultimate: charges with kills (3 to fill), activated with X. Same for all
+// agents: 8 seconds of faster fire, faster movement, and an instant +50 HP.
+export const ULT = {
+  name: 'Overdrive',
+  key: 'X',
+  chargeNeeded: 3,
+  duration: 8,
+  desc: '8s of +40% fire rate, +20% speed and +50 HP. Charges with kills.',
+};
 
 export const BOT_NAMES = [
   'Rook', 'Havoc', 'Sable', 'Mira', 'Knox', 'Ivy', 'Dusk', 'Fang',

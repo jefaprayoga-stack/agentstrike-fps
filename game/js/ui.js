@@ -1,7 +1,7 @@
 // AGENTSTRIKE — UI: screens, shop, gacha, HUD, results.
-import { AGENTS, WEAPONS, SHOP_ITEMS, SKINS, RARITY, GACHA_COST, DUPLICATE_REFUND, MODES, getAgent, getWeapon, getSkin, getRankFor, rollSkin } from './data.js';
+import { AGENTS, WEAPONS, SHOP_ITEMS, SKINS, RARITY, GACHA_COST, DUPLICATE_REFUND, MODES, ULT, getAgent, getWeapon, getSkin, getRankFor, rollSkin } from './data.js';
 import { getSave, addCredits, spendCredits, addRankPoints, ownWeapon, ownSkin, ownItem, recordMatch } from './state.js';
-import { Game } from './game.js';
+import { Game, MAP_DATA } from './game.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString('en-US');
@@ -303,7 +303,7 @@ function startMatch(cfg) {
   $('round-banner').classList.add('hidden');
   $('deploy-overlay').classList.remove('hidden');
   $('deploy-title').textContent = `${mode.name} — ${getAgent(cfg.agent).name}`;
-  $('deploy-sub').textContent = 'Click to deploy. WASD move · Mouse aim · Click shoot · R reload · Q skill · 1/2 weapons · Tab scoreboard';
+  $('deploy-sub').textContent = 'Click to deploy. WASD move · Mouse aim · Click shoot · R reload · Q skill · X ult · E plant/defuse spike · Right-click ADS · Tab scoreboard';
   showScreen('match');
   game = new Game($('game-container'), {
     hud: updateHud,
@@ -334,9 +334,17 @@ function quitMatch() {
   showScreen('menu');
 }
 
-function onRoundEnd({ won, rounds }) {
+const ROUND_REASONS = {
+  elimination: 'ELIMINATION',
+  detonation: 'SPIKE DETONATED',
+  defuse: 'SPIKE DEFUSED',
+  time: 'TIME EXPIRED',
+};
+
+function onRoundEnd({ won, rounds, reason }) {
   const b = $('round-banner');
   $('round-banner-text').textContent = won ? 'ROUND WON' : 'ROUND LOST';
+  $('round-banner-sub').textContent = ROUND_REASONS[reason] || '';
   b.className = 'banner ' + (won ? 'win' : 'lose');
   b.classList.remove('hidden');
   setTimeout(() => b.classList.add('hidden'), 2400);
@@ -382,14 +390,94 @@ function addKillfeed({ killer, victim, weapon, headshot }) {
   while ($('killfeed').children.length > 5) $('killfeed').lastChild.remove();
 }
 
+// ---------------------------------------------------------- minimap
+function drawMinimap(s) {
+  const cv = $('minimap');
+  if (!cv || !s.minimapPlayer) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const bx = MAP_DATA.bounds.x + 2, bz = MAP_DATA.bounds.z + 2;
+  const sx = (x) => ((x + bx) / (bx * 2)) * W;
+  const sz = (z) => ((z + bz) / (bz * 2)) * H;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(8, 10, 16, 0.88)';
+  ctx.fillRect(0, 0, W, H);
+  // sites
+  for (const site of MAP_DATA.sites) {
+    ctx.fillStyle = site.id === 'A' ? 'rgba(53, 167, 255, 0.28)' : 'rgba(255, 70, 85, 0.28)';
+    ctx.fillRect(sx(site.x - site.w / 2), sz(site.z - site.d / 2), (site.w / (bx * 2)) * W, (site.d / (bz * 2)) * H);
+    ctx.fillStyle = site.css;
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(site.id, sx(site.x), sz(site.z) + 4);
+  }
+  // walls
+  ctx.fillStyle = '#5a6274';
+  for (const w of MAP_DATA.walls) {
+    ctx.fillRect(sx(w.x - w.w / 2), sz(w.z - w.d / 2),
+      Math.max(1, (w.w / (bx * 2)) * W), Math.max(1, (w.d / (bz * 2)) * H));
+  }
+  const dot = (x, z, color, r = 3) => {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(sx(x), sz(z), r, 0, Math.PI * 2);
+    ctx.fill();
+  };
+  const diamond = (x, z, color, r = 5) => {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(sx(x), sz(z) - r);
+    ctx.lineTo(sx(x) + r, sz(z));
+    ctx.lineTo(sx(x), sz(z) + r);
+    ctx.lineTo(sx(x) - r, sz(z));
+    ctx.closePath();
+    ctx.fill();
+  };
+  // spike (dropped / planted — carried rides on its carrier)
+  const sp = s.spike;
+  if (sp && sp.state !== 'carried' && sp.x !== null) {
+    diamond(sp.x, sp.z, sp.state === 'planted' ? '#ff4655' : '#ffb020', sp.state === 'planted' ? 6 : 5);
+  }
+  // teammates
+  for (const a of s.allies || []) {
+    if (!a.alive) continue;
+    dot(a.x, a.z, '#2ee6a8');
+    if (a.carrier) diamond(a.x, a.z, '#ffb020', 4);
+  }
+  // visible enemies only
+  for (const e of s.enemies || []) {
+    if (!e.alive || !e.visible) continue;
+    dot(e.x, e.z, '#ff4655');
+    if (e.carrier) diamond(e.x, e.z, '#ffb020', 4);
+  }
+  // player arrow (position + facing)
+  const p = s.minimapPlayer;
+  const px = sx(p.x), py = sz(p.z);
+  const dx = -Math.sin(p.yaw), dz = -Math.cos(p.yaw);
+  const ang = Math.atan2(dz, dx);
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(px + Math.cos(ang) * 8, py + Math.sin(ang) * 8);
+  ctx.lineTo(px + Math.cos(ang + 2.5) * 6, py + Math.sin(ang + 2.5) * 6);
+  ctx.lineTo(px + Math.cos(ang - 2.5) * 6, py + Math.sin(ang - 2.5) * 6);
+  ctx.closePath();
+  ctx.fill();
+  if (sp && sp.playerCarries) diamond(p.x, p.z, '#ffb020', 4);
+}
+
 function updateHud(s) {
   if (!matchActive) return;
+  // health + armor
   const hpPct = Math.max(0, (s.hp / s.maxHp) * 100);
   $('hud-health-fill').style.width = hpPct + '%';
   $('hud-health-fill').style.background = hpPct > 50 ? '#2ee6a8' : hpPct > 25 ? '#ffb020' : '#ff4655';
   $('hud-health-text').textContent = `${Math.ceil(s.hp)} / ${s.maxHp}`;
+  $('hud-armor').textContent = s.maxArmor > 0 ? `🛡 ${Math.ceil(s.armor)}` : '';
+  // ammo + weapon
   $('hud-ammo').textContent = s.reloading ? 'RELOADING…' : `${s.ammo} / ${s.mag}`;
-  $('hud-weapon').textContent = s.weaponName + (s.scoped ? ' · SCOPED' : '');
+  $('hud-reserve').textContent = `RESERVE ${s.reserve}`;
+  $('hud-weapon').textContent = s.weaponName + (s.scoped ? ' · ADS' : '');
+  $('crosshair').classList.toggle('ads-hidden', !!s.adsScoped);
   $('hud-credits').textContent = '+' + fmt(s.credits) + ' CR';
   // skill
   const skillBox = $('hud-skill-box');
@@ -403,16 +491,93 @@ function updateHud(s) {
     $('hud-skill-fill').style.height = '100%';
   }
   $('hud-skill-name').textContent = s.skillName;
-  // score + timer
+  // ultimate
+  const ultBox = $('hud-ult-box');
+  ultBox.classList.toggle('ready', !!s.ultReady && !s.ultActive);
+  ultBox.classList.toggle('active', !!s.ultActive);
+  const pips = ultBox.querySelectorAll('.pip');
+  pips.forEach((pip, i) => pip.classList.toggle('lit', i < s.ultCharge));
+  $('hud-ult-name').textContent = ULT.name;
+  $('hud-ult-state').textContent = s.ultActive ? `${s.ultLeft.toFixed(0)}s` : s.ultReady ? 'READY' : `${s.ultCharge}/${s.ultNeeded}`;
+  // score bar
+  const sideEl = $('hud-side');
   if (s.mode === 'deathmatch') {
-    $('hud-score').textContent = `KILLS ${s.kills} / ${s.killTarget}`;
+    $('hud-score-us').textContent = s.kills;
+    $('hud-score-them').textContent = s.killTarget;
+    $('hud-round').textContent = 'DEATHMATCH';
+    $('hud-target').textContent = 'FIRST TO ' + s.killTarget;
+    sideEl.textContent = 'FFA';
+    sideEl.classList.remove('def');
     $('hud-alive').textContent = '';
   } else {
-    $('hud-score').textContent = `${s.rounds.us} — ${s.rounds.them} · ROUND ${s.round}`;
+    $('hud-score-us').textContent = s.rounds.us;
+    $('hud-score-them').textContent = s.rounds.them;
+    $('hud-round').textContent = `ROUND ${s.round}`;
+    $('hud-target').textContent = `FIRST TO ${s.roundsToWin}`;
+    const atk = s.side === 'attack';
+    sideEl.textContent = atk ? 'ATK' : 'DEF';
+    sideEl.classList.toggle('def', !atk);
     $('hud-alive').textContent = `Alive ${s.alliesAlive} vs ${s.enemiesAlive}`;
   }
   const t = Math.ceil(s.timer);
   $('hud-timer').textContent = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+  // spike timer (planted)
+  const st = $('hud-spike-timer');
+  if (s.spike && s.spike.state === 'planted') {
+    const left = Math.ceil(s.spike.timer);
+    st.textContent = `SPIKE ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+    st.classList.remove('hidden');
+  } else {
+    st.classList.add('hidden');
+  }
+  // spike status line
+  const ss = $('spike-status');
+  if (s.mode === 'deathmatch' || !s.spike) {
+    ss.textContent = '';
+    ss.className = '';
+  } else if (s.spike.state === 'planted') {
+    ss.textContent = `SPIKE PLANTED — SITE ${s.spike.site}`;
+    ss.className = 'planted';
+  } else if (s.spike.playerCarries) {
+    ss.textContent = 'YOU HAVE THE SPIKE — plant it on A or B';
+    ss.className = '';
+  } else if (s.spike.state === 'dropped') {
+    ss.textContent = 'SPIKE DROPPED — pick it up';
+    ss.className = '';
+  } else if (s.spike.carrierName) {
+    ss.textContent = `${s.spike.carrierName.toUpperCase()} HAS THE SPIKE`;
+    ss.className = '';
+  } else {
+    ss.textContent = '';
+    ss.className = '';
+  }
+  // interact prompt + channel progress
+  const prompt = $('interact-prompt');
+  const prog = $('spike-progress');
+  if (s.spike && s.spike.plantProgress > 0) {
+    prompt.classList.add('hidden');
+    prog.classList.remove('hidden');
+    $('spike-progress-label').textContent = 'PLANTING…';
+    $('spike-progress-fill').style.width = (s.spike.plantProgress * 100) + '%';
+  } else if (s.spike && s.spike.defuseProgress > 0) {
+    prompt.classList.add('hidden');
+    prog.classList.remove('hidden');
+    $('spike-progress-label').textContent = 'DEFUSING…';
+    $('spike-progress-fill').style.width = (s.spike.defuseProgress * 100) + '%';
+  } else if (s.spike && s.spike.canPlant) {
+    prog.classList.add('hidden');
+    prompt.classList.remove('hidden');
+    $('interact-text').textContent = `to plant the spike — Site ${s.spike.inSite}`;
+  } else if (s.spike && s.spike.canDefuse) {
+    prog.classList.add('hidden');
+    prompt.classList.remove('hidden');
+    $('interact-text').textContent = 'to defuse the spike';
+  } else {
+    prompt.classList.add('hidden');
+    prog.classList.add('hidden');
+  }
+  // minimap
+  drawMinimap(s);
   // countdown
   if (s.phase === 'countdown') {
     $('countdown').textContent = Math.ceil(s.countdown);
@@ -453,6 +618,7 @@ function updateHud(s) {
   }
   if (s.creditGain) toast(`+${s.creditGain} CR`);
   if (s.skillUsed) toast(`${s.skillUsed} activated`);
+  if (s.notice) toast(s.notice);
 }
 
 // ---------------------------------------------------------- toast

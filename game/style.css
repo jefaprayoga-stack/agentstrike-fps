@@ -237,3 +237,61 @@ body {
   background: rgba(20, 25, 37, .95); border: 1px solid var(--gold); color: var(--gold);
   border-radius: 10px; padding: 10px 20px; font-weight: 700; z-index: 50; pointer-events: none;
 }
+
+/* ---- Valorant-style HUD additions ---- */
+#minimap-wrap {
+  position: absolute; top: 14px; left: 16px; z-index: 5; pointer-events: none;
+}
+#minimap { display: block; border-radius: 8px; box-shadow: 0 0 0 1px var(--line); }
+#minimap-label {
+  text-align: center; font-size: 11px; font-weight: 800; letter-spacing: 2px;
+  color: var(--muted); margin-top: 4px;
+}
+#hud-side { color: var(--red); letter-spacing: 1px; font-size: 13px; }
+#hud-side.def { color: var(--blue); }
+.hud-score-sep { margin: 0 8px; color: var(--muted); }
+#hud-score-us { color: #7ec8ff; }
+#hud-score-them { color: #ff8a94; }
+#hud-round { color: var(--text); font-size: 13px; letter-spacing: 1px; }
+#hud-target { color: var(--muted); font-size: 12px; letter-spacing: 1px; }
+#hud-spike-timer {
+  color: #fff; background: rgba(255, 70, 85, .85); border-radius: 6px;
+  padding: 3px 10px; font-variant-numeric: tabular-nums; animation: pulse 1s infinite;
+}
+#spike-status {
+  position: absolute; bottom: 108px; left: 50%; transform: translateX(-50%);
+  font-weight: 800; font-size: 14px; letter-spacing: 1px; color: var(--gold);
+  text-shadow: 0 0 8px #000; z-index: 5; pointer-events: none; text-align: center;
+}
+#spike-status.planted { color: #ff8a94; }
+#interact-prompt {
+  position: absolute; top: 58%; left: 50%; transform: translateX(-50%);
+  background: rgba(11, 14, 20, .85); border: 1px solid var(--gold); border-radius: 8px;
+  padding: 8px 16px; font-weight: 700; font-size: 14px; z-index: 5; pointer-events: none;
+}
+#spike-progress {
+  position: absolute; top: 63%; left: 50%; transform: translateX(-50%);
+  width: 280px; text-align: center; z-index: 5; pointer-events: none;
+}
+#spike-progress-label { font-weight: 900; letter-spacing: 2px; font-size: 13px; color: var(--gold); margin-bottom: 5px; }
+#spike-progress .bar { height: 10px; }
+#spike-progress-fill { height: 100%; width: 0%; background: var(--gold); transition: width .1s linear; }
+#hud-armor { color: var(--blue); font-size: 12px; }
+#hud-abilities { display: flex; gap: 10px; }
+#hud-ult-box {
+  position: relative; width: 150px; height: 56px; background: rgba(11, 14, 20, .8);
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+#hud-ult-box.ready { border-color: var(--gold); box-shadow: 0 0 12px rgba(255, 176, 32, .35); }
+#hud-ult-box.active { border-color: var(--green); box-shadow: 0 0 12px rgba(46, 230, 168, .4); }
+.hud-ult-pips { display: flex; gap: 4px; justify-content: center; padding-top: 7px; }
+.hud-ult-pips .pip { width: 34px; height: 5px; border-radius: 3px; background: #2a3348; }
+.hud-ult-pips .pip.lit { background: var(--gold); }
+#hud-ult-box .hud-skill-inner { height: 34px; }
+#hud-reserve { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+#hud-bottom { gap: 22px; }
+#round-banner-sub {
+  display: block; font-size: 14px; font-weight: 700; letter-spacing: 2px;
+  color: var(--muted); margin-top: 4px;
+}
+#crosshair.ads-hidden { display: none; }

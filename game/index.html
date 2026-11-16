@@ -35,8 +35,9 @@
       <div class="controls-box">
         <strong>Controls</strong>
         <span><b>WASD</b> move</span><span><b>Mouse</b> aim</span><span><b>Click</b> shoot</span>
-        <span><b>R</b> reload</span><span><b>Q</b> agent skill</span><span><b>1 / 2</b> switch weapon</span>
-        <span><b>Space</b> jump</span><span><b>Right-click</b> scope (Operator)</span><span><b>Tab</b> scoreboard</span>
+        <span><b>R</b> reload</span><span><b>Q</b> agent skill</span><span><b>X</b> ultimate</span>
+        <span><b>E</b> plant / defuse spike</span><span><b>1 / 2</b> switch weapon</span>
+        <span><b>Space</b> jump</span><span><b>Right-click</b> aim down sights</span><span><b>Tab</b> scoreboard</span>
       </div>
     </div>
   </section>
@@ -111,10 +112,17 @@
     <div id="game-container"></div>
 
     <!-- HUD -->
+    <div id="minimap-wrap">
+      <canvas id="minimap" width="190" height="190"></canvas>
+      <div id="minimap-label">HAVEN // A · B</div>
+    </div>
     <div id="hud-top">
-      <div id="hud-mode">AGENTSTRIKE</div>
-      <div id="hud-score">0 — 0</div>
-      <div id="hud-timer">0:00</div>
+      <div id="hud-side">ATK</div>
+      <div id="hud-score"><span id="hud-score-us">0</span><span class="hud-score-sep">—</span><span id="hud-score-them">0</span></div>
+      <div id="hud-round">ROUND 1</div>
+      <div id="hud-target">FIRST TO 5</div>
+      <div id="hud-timer">1:40</div>
+      <div id="hud-spike-timer" class="hidden">SPIKE 0:45</div>
       <div id="hud-alive"></div>
     </div>
     <div id="hud-credits">+0 CR</div>
@@ -124,28 +132,46 @@
     <div id="hitmarker">✕</div>
     <div id="damage-flash"></div>
 
+    <div id="spike-status"></div>
+    <div id="interact-prompt" class="hidden">Hold <span class="key">E</span> <span id="interact-text">to plant the spike</span></div>
+    <div id="spike-progress" class="hidden">
+      <div id="spike-progress-label">PLANTING…</div>
+      <div class="bar"><div id="spike-progress-fill"></div></div>
+    </div>
+
     <div id="hud-bottom">
       <div id="hud-health">
-        <div class="hud-label">HP</div>
+        <div class="hud-label">HP <span id="hud-armor"></span></div>
         <div class="bar"><div id="hud-health-fill"></div></div>
         <div id="hud-health-text">100 / 100</div>
       </div>
-      <div id="hud-skill-box">
-        <div id="hud-skill-fill"></div>
-        <div class="hud-skill-inner">
-          <span class="key">Q</span>
-          <span id="hud-skill-name">Skill</span>
-          <span id="hud-skill-cool">READY</span>
+      <div id="hud-abilities">
+        <div id="hud-skill-box">
+          <div id="hud-skill-fill"></div>
+          <div class="hud-skill-inner">
+            <span class="key">Q</span>
+            <span id="hud-skill-name">Skill</span>
+            <span id="hud-skill-cool">READY</span>
+          </div>
+        </div>
+        <div id="hud-ult-box">
+          <div class="hud-ult-pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span></div>
+          <div class="hud-skill-inner">
+            <span class="key">X</span>
+            <span id="hud-ult-name">Overdrive</span>
+            <span id="hud-ult-state">0/3</span>
+          </div>
         </div>
       </div>
       <div id="hud-ammo-box">
         <div id="hud-weapon">Classic</div>
         <div id="hud-ammo">12 / 12</div>
+        <div id="hud-reserve">RESERVE 48</div>
       </div>
     </div>
 
     <div id="countdown" class="hidden">3</div>
-    <div id="round-banner" class="banner hidden"><span id="round-banner-text"></span></div>
+    <div id="round-banner" class="banner hidden"><span id="round-banner-text"></span><span id="round-banner-sub"></span></div>
 
     <div id="dead-overlay" class="overlay hidden">
       <h2>You are down</h2>
